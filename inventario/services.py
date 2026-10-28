@@ -1,27 +1,32 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import Movimiento, OrdenCompra, OrdenVenta, Producto
+from .models import Movimiento, OrdenCompra, OrdenVenta, Producto, StockBodega
 
 
 @transaction.atomic
 def aplicar_movimiento(mov):
-    # Bloquea la fila del producto para que dos operaciones simultáneas no se pisen
+    # Bloquea el producto y su stock en esa bodega para evitar choques entre operaciones
     producto = Producto.objects.select_for_update().get(pk=mov.producto_id)
+    stock, _ = StockBodega.objects.select_for_update().get_or_create(
+        producto=producto, bodega_id=mov.bodega_id
+    )
 
     if mov.tipo == Movimiento.Tipo.ENTRADA:
-        nuevo = producto.stock_actual + mov.cantidad
+        nuevo = stock.cantidad + mov.cantidad
     elif mov.tipo == Movimiento.Tipo.SALIDA:
-        if mov.cantidad > producto.stock_actual:
-            raise ValidationError(f'Stock insuficiente: hay {producto.stock_actual} unidades.')
-        nuevo = producto.stock_actual - mov.cantidad
-    else:  # AJUSTE: la cantidad es el stock real
+        if mov.cantidad > stock.cantidad:
+            raise ValidationError(f'Stock insuficiente: hay {stock.cantidad} unidades en esa bodega.')
+        nuevo = stock.cantidad - mov.cantidad
+    else:  # AJUSTE: la cantidad es el stock real contado en esa bodega
         nuevo = mov.cantidad
 
-    producto.stock_actual = nuevo
+    producto.stock_actual += nuevo - stock.cantidad   # el total del producto se mantiene al día
+    stock.cantidad = nuevo
+    stock.save(update_fields=['cantidad'])
     producto.save(update_fields=['stock_actual', 'actualizado'])
 
-    mov.stock_resultante = nuevo
+    mov.stock_resultante = nuevo   # ahora es el stock que quedó en esa bodega
     mov.save()
     return mov
 
@@ -35,7 +40,7 @@ def recibir_compra(orden, usuario):
 
     for item in orden.items.select_related('producto'):
         aplicar_movimiento(Movimiento(
-            producto=item.producto, tipo=Movimiento.Tipo.ENTRADA,
+            producto=item.producto, bodega=orden.bodega, tipo=Movimiento.Tipo.ENTRADA,
             cantidad=item.cantidad, motivo=f'Compra #{orden.pk}', usuario=usuario,
         ))
     orden.estado = OrdenCompra.Estado.RECIBIDA
@@ -51,7 +56,7 @@ def completar_venta(orden, usuario):
 
     for item in orden.items.select_related('producto'):
         aplicar_movimiento(Movimiento(
-            producto=item.producto, tipo=Movimiento.Tipo.SALIDA,
+            producto=item.producto, bodega=orden.bodega, tipo=Movimiento.Tipo.SALIDA,
             cantidad=item.cantidad, motivo=f'Venta #{orden.pk}', usuario=usuario,
         ))
     orden.estado = OrdenVenta.Estado.COMPLETADA

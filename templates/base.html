@@ -1,0 +1,93 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Inventario{% endblock %}</title>
+  <script>document.documentElement.setAttribute('data-bs-theme', localStorage.getItem('tema') || 'light');</script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{% static 'css/app.css' %}" rel="stylesheet">
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="marca"><i class="bi bi-box-seam-fill"></i> Inventario</div>
+
+  <div class="seccion">Operación</div>
+  <a class="item {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i> Panel</a>
+  <a class="item" href="{% url 'admin:inventario_bodega_changelist' %}"><i class="bi bi-building"></i> Bodegas</a>
+  <a class="item" href="{% url 'admin:inventario_producto_changelist' %}"><i class="bi bi-box-seam"></i> Productos</a>
+  <a class="item" href="{% url 'admin:inventario_movimiento_changelist' %}"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
+
+  <div class="seccion">Compras y ventas</div>
+  <a class="item" href="{% url 'admin:inventario_ordencompra_changelist' %}"><i class="bi bi-cart-plus"></i> Órdenes de compra</a>
+  <a class="item" href="{% url 'admin:inventario_ordenventa_changelist' %}"><i class="bi bi-receipt"></i> Órdenes de venta</a>
+  <a class="item" href="{% url 'admin:inventario_cliente_changelist' %}"><i class="bi bi-people"></i> Clientes</a>
+
+  <div class="seccion">Catálogos</div>
+  <a class="item" href="{% url 'admin:inventario_proveedor_changelist' %}"><i class="bi bi-truck"></i> Proveedores</a>
+  <a class="item" href="{% url 'admin:inventario_categoria_changelist' %}"><i class="bi bi-tags"></i> Categorías</a>
+
+  <div class="seccion">Análisis</div>
+  <a class="item {% if '/reportes' in request.path %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes</a>
+
+  {% if user.is_staff %}
+    <div class="seccion">Administración</div>
+    <a class="item" href="{% url 'admin:auth_user_changelist' %}"><i class="bi bi-person-gear"></i> Usuarios</a>
+    <a class="item" href="{% url 'admin:auth_group_changelist' %}"><i class="bi bi-shield-check"></i> Roles y permisos</a>
+  {% endif %}
+
+  <div class="pie">{% if user.is_superuser %}Administrador{% else %}Usuario{% endif %} · v1.0</div>
+</aside>
+
+<div class="contenido">
+  <header class="topbar">
+    <button class="btn btn-sm d-lg-none me-auto" id="btnMenu"><i class="bi bi-list fs-4"></i></button>
+    <button class="btn btn-outline-secondary btn-sm" disabled title="Próximamente"><i class="bi bi-upc-scan"></i> Escanear</button>
+    <button class="btn btn-sm" id="btnTema" title="Cambiar tema"><i class="bi bi-moon-stars" id="iconoTema"></i></button>
+    <div class="dropdown">
+      <button class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+        <span class="avatar">{{ user.username|slice:":1"|upper }}</span>{{ user.username }}
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="dropdown-item">Cerrar sesión</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </header>
+
+  <main class="pagina">
+    {% block contenido %}{% endblock %}
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const html = document.documentElement;
+  const icono = document.getElementById('iconoTema');
+
+  function pintarIcono() {
+    icono.className = html.getAttribute('data-bs-theme') === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+  }
+  pintarIcono();
+
+  document.getElementById('btnTema').addEventListener('click', () => {
+    const nuevo = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-bs-theme', nuevo);
+    localStorage.setItem('tema', nuevo);
+    pintarIcono();
+  });
+
+  document.getElementById('btnMenu').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('abierto');
+  });
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

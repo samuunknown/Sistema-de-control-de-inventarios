@@ -3,8 +3,8 @@ from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from .models import (Categoria, Cliente, ItemCompra, ItemVenta, Movimiento,
-                     OrdenCompra, OrdenVenta, Producto, Proveedor)
+from .models import (Bodega, Categoria, Cliente, ItemCompra, ItemVenta, Movimiento,
+                     OrdenCompra, OrdenVenta, Producto, Proveedor, StockBodega)
 from .services import aplicar_movimiento, completar_venta, recibir_compra
 
 # Permite escribir precios con puntos de miles (40.000)
@@ -22,9 +22,32 @@ class CategoriaAdmin(admin.ModelAdmin):
     search_fields = ('nombre',)
 
 
+@admin.register(Bodega)
+class BodegaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'direccion', 'activa')
+    search_fields = ('nombre',)
+
+
+class StockInline(admin.TabularInline):
+    model = StockBodega
+    extra = 0
+    readonly_fields = ('bodega', 'cantidad')
+    verbose_name_plural = 'Stock por bodega'
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
     form = ProductoForm
+    inlines = [StockInline]
     list_display = ('nombre', 'categoria', 'precio_venta', 'stock_actual', 'stock_minimo', 'activo')
     list_filter = ('categoria', 'activo')
     search_fields = ('nombre', 'codigo_barras')

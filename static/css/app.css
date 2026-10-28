@@ -1,0 +1,102 @@
+:root {
+  --sidebar-bg: #111827;
+  --sidebar-texto: #9ca3af;
+  --acento: #ea580c;
+  --fondo: #f6f4ef;
+  --borde: rgba(0, 0, 0, .08);
+}
+
+[data-bs-theme='dark'] {
+  --sidebar-bg: #0b0f19;
+  --fondo: #1a1613;
+  --borde: rgba(255, 255, 255, .08);
+}
+
+body { background: var(--fondo); }
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 240px;
+  background: var(--sidebar-bg);
+  color: var(--sidebar-texto);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 1040;
+}
+
+.sidebar .marca {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: 1.1rem 1.25rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+.sidebar .marca i { color: var(--acento); }
+
+.sidebar .seccion {
+  padding: 1rem 1.25rem .35rem;
+  font-size: .7rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.sidebar a.item {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin: 1px .6rem;
+  padding: .5rem .8rem;
+  border-radius: .5rem;
+  color: var(--sidebar-texto);
+  text-decoration: none;
+  font-size: .9rem;
+}
+
+.sidebar a.item:hover { background: rgba(255, 255, 255, .06); color: #fff; }
+.sidebar a.item.active { background: rgba(255, 255, 255, .12); color: #fff; }
+
+.sidebar .pie {
+  margin-top: auto;
+  padding: 1rem 1.25rem;
+  font-size: .8rem;
+}
+
+.contenido { margin-left: 240px; min-height: 100vh; }
+
+.topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .5rem;
+  padding: 0 1.5rem;
+  background: var(--bs-body-bg);
+  border-bottom: 1px solid var(--borde);
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-right: .4rem;
+  border-radius: 50%;
+  background: var(--acento);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+.pagina { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+
+@media (max-width: 991px) {
+  .sidebar { transform: translateX(-100%); transition: transform .2s; }
+  .sidebar.abierto { transform: none; }
+  .contenido { margin-left: 0; }
+}

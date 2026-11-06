@@ -61,3 +61,16 @@ def completar_venta(orden, usuario):
         ))
     orden.estado = OrdenVenta.Estado.COMPLETADA
     orden.save(update_fields=['estado'])
+
+
+@transaction.atomic
+def trasladar(producto, origen, destino, cantidad, usuario, motivo=''):
+    detalle = f' · {motivo}' if motivo else ''
+    aplicar_movimiento(Movimiento(
+        producto=producto, bodega=origen, tipo=Movimiento.Tipo.SALIDA, cantidad=cantidad,
+        motivo=f'Traslado a {destino}{detalle}'[:200], usuario=usuario,
+    ))
+    aplicar_movimiento(Movimiento(
+        producto=producto, bodega=destino, tipo=Movimiento.Tipo.ENTRADA, cantidad=cantidad,
+        motivo=f'Traslado desde {origen}{detalle}'[:200], usuario=usuario,
+    ))    

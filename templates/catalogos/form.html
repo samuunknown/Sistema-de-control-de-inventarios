@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <a href="{{ url_lista }}" class="text-decoration-none small"><i class="bi bi-arrow-left"></i> Volver a {{ volver|lower }}</a>
+  <h2 class="mb-0 mt-1">{{ titulo }}</h2>
+</div>
+
+<div class="row">
+  <div class="col-lg-8">
+    <form method="post" class="card border-0 shadow-sm">
+      <div class="card-body">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="row g-3">
+          {% for campo in form %}
+            <div class="{% if campo.name == 'descripcion' or campo.name == 'direccion' %}col-12{% else %}col-md-6{% endif %}">
+              {% if campo.field.widget.input_type == 'checkbox' %}
+                <div class="form-check mt-2">
+                  {{ campo }}
+                  <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                </div>
+              {% else %}
+                <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                {{ campo }}
+              {% endif %}
+              {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+              {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-acento">Guardar</button>
+          <a href="{{ url_lista }}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

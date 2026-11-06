@@ -100,3 +100,6 @@ body { background: var(--fondo); }
   .sidebar.abierto { transform: none; }
   .contenido { margin-left: 0; }
 }
+
+.btn-acento { background: var(--acento); border-color: var(--acento); color: #fff; }
+.btn-acento:hover { background: #c2410c; border-color: #c2410c; color: #fff; }

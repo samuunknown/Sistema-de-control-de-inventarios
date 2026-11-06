@@ -1,0 +1,19 @@
+<tr>
+  <td>
+    {% for oculto in f.hidden_fields %}{{ oculto }}{% endfor %}
+    {{ f.producto }}
+    {% for e in f.producto.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </td>
+  <td>
+    {{ f.cantidad }}
+    {% for e in f.cantidad.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </td>
+  <td>
+    {{ f.precio_unitario }}
+    {% for e in f.precio_unitario.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+  </td>
+  <td class="text-end">
+    <span class="d-none">{{ f.DELETE }}</span>
+    <button type="button" class="btn btn-sm btn-outline-danger btn-quitar" title="Quitar"><i class="bi bi-trash"></i></button>
+  </td>
+</tr>

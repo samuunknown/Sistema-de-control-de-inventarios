@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ pagina }}{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <a href="{% if orden %}{{ url_detalle }}{% else %}{{ url_lista }}{% endif %}" class="text-decoration-none small"><i class="bi bi-arrow-left"></i> Volver</a>
+  <h2 class="mb-0 mt-1">{{ pagina }}</h2>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+  {% if formset.non_form_errors %}<div class="alert alert-danger">{{ formset.non_form_errors }}</div>{% endif %}
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="row g-3">
+        {% for campo in form %}
+          <div class="{% if campo.name == 'observaciones' %}col-12{% else %}col-md-6{% endif %}">
+            <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+            {{ campo }}
+            {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+            {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0">Productos</h6>
+        <button type="button" id="btnAgregar" class="btn btn-sm btn-outline-secondary"><i class="bi bi-plus-lg"></i> Agregar producto</button>
+      </div>
+      {{ formset.management_form }}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th style="width: 130px;">Cantidad</th>
+              <th style="width: 190px;">Precio unitario</th>
+              <th style="width: 50px;"></th>
+            </tr>
+          </thead>
+          <tbody id="filasItems">
+            {% for f in formset %}{% include 'ordenes/fila_item.html' %}{% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="form-text mt-2">Si dejas el precio en 0, se usa el precio actual del producto.</div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-acento">Guardar orden</button>
+    <a href="{% if orden %}{{ url_detalle }}{% else %}{{ url_lista }}{% endif %}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+
+<template id="plantillaFila">
+  {% include 'ordenes/fila_item.html' with f=formset.empty_form %}
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const cuerpo = document.getElementById('filasItems');
+  const total = document.querySelector('input[name$="TOTAL_FORMS"]');
+
+  document.getElementById('btnAgregar').addEventListener('click', () => {
+    const indice = parseInt(total.value);
+    const html = document.getElementById('plantillaFila').innerHTML.replaceAll('__prefix__', indice);
+    cuerpo.insertAdjacentHTML('beforeend', html);
+    total.value = indice + 1;
+  });
+
+  cuerpo.addEventListener('click', (e) => {
+    const boton = e.target.closest('.btn-quitar');
+    if (!boton) return;
+    const fila = boton.closest('tr');
+    fila.querySelector('input[name$="-DELETE"]').checked = true;
+    fila.classList.add('d-none');
+  });
+</script>
+{% endblock %}

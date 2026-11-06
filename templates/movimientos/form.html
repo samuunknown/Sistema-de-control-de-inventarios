@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <a href="{% url 'movimiento_lista' %}" class="text-decoration-none small"><i class="bi bi-arrow-left"></i> Volver a movimientos</a>
+  <h2 class="mb-0 mt-1">{{ titulo }}</h2>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <form method="post" class="card border-0 shadow-sm">
+      <div class="card-body">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="row g-3">
+          {% for campo in form %}
+            <div class="col-md-6">
+              <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+              {{ campo }}
+              {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+              {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-acento">Registrar</button>
+          <a href="{% url 'movimiento_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body small">
+        {% if es_movimiento %}
+          <h6>¿Cómo funciona?</h6>
+          <p class="mb-2"><strong>Entrada:</strong> la cantidad se suma al stock de la bodega.</p>
+          <p class="mb-2"><strong>Salida:</strong> la cantidad se resta. No puede superar el stock disponible.</p>
+          <p class="mb-0"><strong>Ajuste:</strong> la cantidad es el stock real que contaste; el sistema corrige la diferencia.</p>
+        {% else %}
+          <h6>¿Cómo funciona?</h6>
+          <p class="mb-0 text-muted">El traslado descuenta del origen y suma al destino en una sola operación. Si el origen no tiene suficiente stock, no se mueve nada.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

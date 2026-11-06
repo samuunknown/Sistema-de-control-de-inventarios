@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <a href="{% url 'producto_lista' %}" class="text-decoration-none small"><i class="bi bi-arrow-left"></i> Volver a productos</a>
+  <h2 class="mb-0 mt-1">{{ titulo }}</h2>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <form method="post" class="card border-0 shadow-sm">
+      <div class="card-body">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="row g-3">
+          {% for campo in form %}
+            <div class="{% if campo.name == 'descripcion' %}col-12{% else %}col-md-6{% endif %}">
+              {% if campo.field.widget.input_type == 'checkbox' %}
+                <div class="form-check mt-4">
+                  {{ campo }}
+                  <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                </div>
+              {% else %}
+                <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                {{ campo }}
+              {% endif %}
+              {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+              {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-acento">Guardar</button>
+          <a href="{% url 'producto_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if producto %}
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h6 class="mb-3">Stock por bodega</h6>
+          <table class="table table-sm align-middle mb-2">
+            <tbody>
+              {% for s in stocks %}
+                <tr><td>{{ s.bodega }}</td><td class="text-end fw-semibold">{{ s.cantidad }}</td></tr>
+              {% empty %}
+                <tr><td class="text-muted">Sin stock en ninguna bodega.</td></tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr><th>Total</th><th class="text-end">{{ producto.stock_actual }}</th></tr>
+            </tfoot>
+          </table>
+          <p class="small text-muted mb-0">El stock no se edita aquí: cambia con entradas, salidas y ajustes (movimientos).</p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

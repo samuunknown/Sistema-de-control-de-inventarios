@@ -17,18 +17,18 @@
 
   <div class="seccion">Operación</div>
   <a class="item {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i> Panel</a>
-  <a class="item" href="{% url 'admin:inventario_bodega_changelist' %}"><i class="bi bi-building"></i> Bodegas</a>
-  <a class="item" href="{% url 'admin:inventario_producto_changelist' %}"><i class="bi bi-box-seam"></i> Productos</a>
-  <a class="item" href="{% url 'admin:inventario_movimiento_changelist' %}"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
+  <a class="item {% if '/bodegas' in request.path %}active{% endif %}" href="{% url 'bodega_lista' %}"><i class="bi bi-building"></i> Bodegas</a>
+  <a class="item {% if '/productos' in request.path %}active{% endif %}" href="{% url 'producto_lista' %}"><i class="bi bi-box-seam"></i> Productos</a>
+  <a class="item {% if '/movimientos' in request.path %}active{% endif %}" href="{% url 'movimiento_lista' %}"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
 
   <div class="seccion">Compras y ventas</div>
-  <a class="item" href="{% url 'admin:inventario_ordencompra_changelist' %}"><i class="bi bi-cart-plus"></i> Órdenes de compra</a>
-  <a class="item" href="{% url 'admin:inventario_ordenventa_changelist' %}"><i class="bi bi-receipt"></i> Órdenes de venta</a>
-  <a class="item" href="{% url 'admin:inventario_cliente_changelist' %}"><i class="bi bi-people"></i> Clientes</a>
+  <a class="item {% if '/compras' in request.path %}active{% endif %}" href="{% url 'compra_lista' %}"><i class="bi bi-cart-plus"></i> Órdenes de compra</a>
+  <a class="item {% if '/ventas' in request.path %}active{% endif %}" href="{% url 'venta_lista' %}"><i class="bi bi-receipt"></i> Órdenes de venta</a>
+  <a class="item {% if '/clientes' in request.path %}active{% endif %}" href="{% url 'cliente_lista' %}"><i class="bi bi-people"></i> Clientes</a>
 
   <div class="seccion">Catálogos</div>
-  <a class="item" href="{% url 'admin:inventario_proveedor_changelist' %}"><i class="bi bi-truck"></i> Proveedores</a>
-  <a class="item" href="{% url 'admin:inventario_categoria_changelist' %}"><i class="bi bi-tags"></i> Categorías</a>
+  <a class="item {% if '/proveedores' in request.path %}active{% endif %}" href="{% url 'proveedor_lista' %}"><i class="bi bi-truck"></i> Proveedores</a>
+    <a class="item {% if '/categorias' in request.path %}active{% endif %}" href="{% url 'categoria_lista' %}"><i class="bi bi-tags"></i> Categorías</a>
 
   <div class="seccion">Análisis</div>
   <a class="item {% if '/reportes' in request.path %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes</a>
@@ -63,6 +63,12 @@
   </header>
 
   <main class="pagina">
+    {% for m in messages %}
+      <div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %} alert-dismissible fade show">
+        {{ m }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    {% endfor %}
     {% block contenido %}{% endblock %}
   </main>
 </div>

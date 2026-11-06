@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ orden }}{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <a href="{{ url_lista }}" class="text-decoration-none small"><i class="bi bi-arrow-left"></i> Volver a {{ titulo|lower }}</a>
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-1">
+    <h2 class="mb-0">
+      {{ orden }}
+      <span class="badge fs-6 {% if orden.estado == 'PENDIENTE' %}text-bg-warning{% elif orden.estado == 'CANCELADA' %}text-bg-secondary{% else %}text-bg-success{% endif %}">{{ orden.get_estado_display }}</span>
+    </h2>
+    {% if pendiente %}
+      <div class="d-flex gap-2">
+        <a href="{{ url_editar }}" class="btn btn-outline-secondary"><i class="bi bi-pencil"></i> Editar</a>
+        <form method="post" action="{{ url_cancelar }}" onsubmit="return confirm('¿Cancelar esta orden?');">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger"><i class="bi bi-x-circle"></i> Cancelar</button>
+        </form>
+        <form method="post" action="{{ url_accion }}" onsubmit="return confirm('{{ confirmar }}');">
+          {% csrf_token %}
+          <button class="btn btn-acento"><i class="bi {{ icono_accion }}"></i> {{ accion }}</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">{{ tercero_label }}</div>
+        <div class="fw-semibold mb-3">{{ tercero|default:'Mostrador' }}</div>
+        <div class="text-muted small">Bodega</div>
+        <div class="fw-semibold mb-3">{{ orden.bodega }}</div>
+        <div class="text-muted small">Fecha</div>
+        <div class="fw-semibold mb-3">{{ orden.fecha|date:'d/m/Y H:i' }}</div>
+        <div class="text-muted small">Creada por</div>
+        <div class="fw-semibold mb-3">{{ orden.usuario.username }}</div>
+        {% if orden.observaciones %}
+          <div class="text-muted small">Observaciones</div>
+          <div>{{ orden.observaciones }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th class="text-end">Cantidad</th>
+              <th class="text-end">Precio unitario</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+              <tr>
+                <td>{{ item.producto.nombre }}</td>
+                <td class="text-end">{{ item.cantidad }}</td>
+                <td class="text-end">$ {{ item.precio_unitario|floatformat:'0g' }}</td>
+                <td class="text-end">$ {{ item.subtotal|floatformat:'0g' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="3" class="text-end">Total</th>
+              <th class="text-end">$ {{ orden.total|floatformat:'0g' }}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

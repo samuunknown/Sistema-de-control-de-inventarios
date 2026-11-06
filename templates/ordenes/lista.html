@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+  <div>
+    <h2 class="mb-0">{{ titulo }}</h2>
+    <p class="text-muted mb-0">{{ page_obj.paginator.count }} órdenes encontradas</p>
+  </div>
+  <a href="{{ url_crear }}" class="btn btn-acento"><i class="bi bi-plus-lg"></i> {{ nuevo }}</a>
+</div>
+
+<form method="get" class="card border-0 shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row g-2">
+      <div class="col-md-4">
+        <input type="search" name="q" value="{{ q }}" class="form-control" placeholder="Número o nombre de {{ tercero_label|lower }}">
+      </div>
+      <div class="col-md-3">
+        <select name="estado" class="form-select">
+          <option value="">Todos los estados</option>
+          {% for valor, etiqueta in estados %}
+            <option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="bodega" class="form-select">
+          <option value="">Todas las bodegas</option>
+          {% for b in bodegas %}
+            <option value="{{ b.pk }}" {% if bodega == b.pk|stringformat:'s' %}selected{% endif %}>{{ b.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-outline-secondary">Filtrar</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="card border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Orden</th>
+          <th>Fecha</th>
+          <th>{{ tercero_label }}</th>
+          <th>Bodega</th>
+          <th>Estado</th>
+          <th class="text-end">Total</th>
+          <th>Usuario</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in filas %}
+          <tr>
+            <td class="fw-semibold">#{{ f.orden.pk }}</td>
+            <td class="text-nowrap">{{ f.orden.fecha|date:'d/m/Y H:i' }}</td>
+            <td>{{ f.tercero }}</td>
+            <td>{{ f.orden.bodega }}</td>
+            <td>
+              <span class="badge {% if f.orden.estado == 'PENDIENTE' %}text-bg-warning{% elif f.orden.estado == 'CANCELADA' %}text-bg-secondary{% else %}text-bg-success{% endif %}">{{ f.orden.get_estado_display }}</span>
+            </td>
+            <td class="text-end">$ {{ f.orden.total|floatformat:'0g' }}</td>
+            <td>{{ f.orden.usuario.username }}</td>
+            <td class="text-end"><a href="{{ f.url }}" class="btn btn-sm btn-outline-secondary">Ver</a></td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="text-center text-muted py-5">No hay órdenes con esos filtros.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if page_obj.has_other_pages %}
+  <nav class="mt-3">
+    <ul class="pagination justify-content-center mb-0">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">«</a></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?{{ querystring }}&page={{ page_obj.next_page_number }}">»</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+{% endblock %}

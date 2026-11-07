@@ -17,35 +17,63 @@
 
   <div class="seccion">Operación</div>
   <a class="item {% if request.path == '/' %}active{% endif %}" href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2"></i> Panel</a>
-  <a class="item {% if '/bodegas' in request.path %}active{% endif %}" href="{% url 'bodega_lista' %}"><i class="bi bi-building"></i> Bodegas</a>
-  <a class="item {% if '/productos' in request.path %}active{% endif %}" href="{% url 'producto_lista' %}"><i class="bi bi-box-seam"></i> Productos</a>
-  <a class="item {% if '/movimientos' in request.path %}active{% endif %}" href="{% url 'movimiento_lista' %}"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
-
-  <div class="seccion">Compras y ventas</div>
-  <a class="item {% if '/compras' in request.path %}active{% endif %}" href="{% url 'compra_lista' %}"><i class="bi bi-cart-plus"></i> Órdenes de compra</a>
-  <a class="item {% if '/ventas' in request.path %}active{% endif %}" href="{% url 'venta_lista' %}"><i class="bi bi-receipt"></i> Órdenes de venta</a>
-  <a class="item {% if '/clientes' in request.path %}active{% endif %}" href="{% url 'cliente_lista' %}"><i class="bi bi-people"></i> Clientes</a>
-
-  <div class="seccion">Catálogos</div>
-  <a class="item {% if '/proveedores' in request.path %}active{% endif %}" href="{% url 'proveedor_lista' %}"><i class="bi bi-truck"></i> Proveedores</a>
-    <a class="item {% if '/categorias' in request.path %}active{% endif %}" href="{% url 'categoria_lista' %}"><i class="bi bi-tags"></i> Categorías</a>
-
-  <div class="seccion">Análisis</div>
-  <a class="item {% if '/reportes' in request.path %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes</a>
-
-  {% if user.is_staff %}
-    <div class="seccion">Administración</div>
-    <a class="item" href="{% url 'admin:auth_user_changelist' %}"><i class="bi bi-person-gear"></i> Usuarios</a>
-    <a class="item" href="{% url 'admin:auth_group_changelist' %}"><i class="bi bi-shield-check"></i> Roles y permisos</a>
+  {% if perms.inventario.view_bodega %}
+    <a class="item {% if '/bodegas' in request.path %}active{% endif %}" href="{% url 'bodega_lista' %}"><i class="bi bi-building"></i> Bodegas</a>
+  {% endif %}
+  {% if perms.inventario.view_producto %}
+    <a class="item {% if '/productos' in request.path %}active{% endif %}" href="{% url 'producto_lista' %}"><i class="bi bi-box-seam"></i> Productos</a>
+  {% endif %}
+  {% if perms.inventario.view_movimiento %}
+    <a class="item {% if '/movimientos' in request.path %}active{% endif %}" href="{% url 'movimiento_lista' %}"><i class="bi bi-arrow-left-right"></i> Movimientos</a>
   {% endif %}
 
-  <div class="pie">{% if user.is_superuser %}Administrador{% else %}Usuario{% endif %} · v1.0</div>
+  {% if perms.inventario.view_ordencompra or perms.inventario.view_ordenventa or perms.inventario.view_cliente %}
+    <div class="seccion">Compras y ventas</div>
+    {% if perms.inventario.view_ordencompra %}
+      <a class="item {% if '/compras' in request.path %}active{% endif %}" href="{% url 'compra_lista' %}"><i class="bi bi-cart-plus"></i> Órdenes de compra</a>
+    {% endif %}
+    {% if perms.inventario.view_ordenventa %}
+      <a class="item {% if '/ventas' in request.path %}active{% endif %}" href="{% url 'venta_lista' %}"><i class="bi bi-receipt"></i> Órdenes de venta</a>
+    {% endif %}
+    {% if perms.inventario.view_cliente %}
+      <a class="item {% if '/clientes' in request.path %}active{% endif %}" href="{% url 'cliente_lista' %}"><i class="bi bi-people"></i> Clientes</a>
+    {% endif %}
+  {% endif %}
+
+  {% if perms.inventario.view_proveedor or perms.inventario.view_categoria %}
+    <div class="seccion">Catálogos</div>
+    {% if perms.inventario.view_proveedor %}
+      <a class="item {% if '/proveedores' in request.path %}active{% endif %}" href="{% url 'proveedor_lista' %}"><i class="bi bi-truck"></i> Proveedores</a>
+    {% endif %}
+    {% if perms.inventario.view_categoria %}
+      <a class="item {% if '/categorias' in request.path %}active{% endif %}" href="{% url 'categoria_lista' %}"><i class="bi bi-tags"></i> Categorías</a>
+    {% endif %}
+  {% endif %}
+
+  {% if perms.inventario.ver_reportes %}
+    <div class="seccion">Análisis</div>
+    <a class="item {% if '/reportes' in request.path %}active{% endif %}" href="{% url 'reportes' %}"><i class="bi bi-file-earmark-bar-graph"></i> Reportes</a>
+  {% endif %}
+
+  {% if perms.auth.view_user or perms.auth.view_group %}
+    <div class="seccion">Administración</div>
+    {% if perms.auth.view_user %}
+      <a class="item {% if '/usuarios' in request.path %}active{% endif %}" href="{% url 'usuario_lista' %}"><i class="bi bi-person-gear"></i> Usuarios</a>
+    {% endif %}
+    {% if perms.auth.view_group %}
+      <a class="item {% if '/roles' in request.path %}active{% endif %}" href="{% url 'rol_lista' %}"><i class="bi bi-shield-check"></i> Roles y permisos</a>
+    {% endif %}
+  {% endif %}
+
+  <div class="pie">{% if user.is_superuser %}Superusuario{% else %}{{ user.groups.first.name|default:'Sin rol' }}{% endif %} · v1.0</div>
 </aside>
 
 <div class="contenido">
   <header class="topbar">
     <button class="btn btn-sm d-lg-none me-auto" id="btnMenu"><i class="bi bi-list fs-4"></i></button>
-    <button class="btn btn-outline-secondary btn-sm" disabled title="Próximamente"><i class="bi bi-upc-scan"></i> Escanear</button>
+        {% if perms.inventario.view_producto %}
+      <a href="{% url 'escanear' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-upc-scan"></i> Escanear</a>
+    {% endif %}
     <button class="btn btn-sm" id="btnTema" title="Cambiar tema"><i class="bi bi-moon-stars" id="iconoTema"></i></button>
     <div class="dropdown">
       <button class="btn btn-sm dropdown-toggle" data-bs-toggle="dropdown">

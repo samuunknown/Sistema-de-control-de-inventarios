@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <a href="{% url 'usuario_lista' %}" class="text-decoration-none small"><i class="bi bi-arrow-left"></i> Volver a usuarios</a>
+  <h2 class="mb-0 mt-1">{{ titulo }}</h2>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <form method="post" class="card border-0 shadow-sm">
+      <div class="card-body">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="row g-3">
+          {% for campo in form %}
+            <div class="col-md-6">
+              {% if campo.field.widget.input_type == 'checkbox' %}
+                <div class="form-check mt-4">
+                  {{ campo }}
+                  <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                </div>
+              {% else %}
+                <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+                {{ campo }}
+              {% endif %}
+              {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+              {% for error in campo.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4 d-flex gap-2">
+          <button class="btn btn-acento">Guardar</button>
+          <a href="{% url 'usuario_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body small">
+        <h6>¿Qué puede hacer cada rol?</h6>
+        <p class="mb-2"><strong>Administrador:</strong> todo, incluidos los usuarios y los reportes.</p>
+        <p class="mb-2"><strong>Bodeguero:</strong> productos, categorías, proveedores, compras, movimientos y reportes. Solo consulta bodegas, clientes y ventas.</p>
+        <p class="mb-0"><strong>Vendedor:</strong> consulta productos, bodegas y movimientos, y gestiona clientes y ventas.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

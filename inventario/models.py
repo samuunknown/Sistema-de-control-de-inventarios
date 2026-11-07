@@ -31,6 +31,7 @@ class Producto(models.Model):
 
     class Meta:
         ordering = ['nombre']
+        permissions = [('ver_reportes', 'Puede ver y descargar reportes')]
 
     def __str__(self):
         return self.nombre

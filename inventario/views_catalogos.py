@@ -76,6 +76,9 @@ class CatalogoLista(LoginRequiredMixin, ListView):
         params = self.request.GET.copy()
         params.pop('page', None)
         ctx['querystring'] = params.urlencode()
+        modelo = self.config['modelo']._meta.model_name
+        ctx['puede_crear'] = self.request.user.has_perm(f'inventario.add_{modelo}')
+        ctx['puede_editar'] = self.request.user.has_perm(f'inventario.change_{modelo}')
         return ctx
 
 

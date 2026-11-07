@@ -57,7 +57,7 @@ def producto_lista(request):
 
 @login_required
 def producto_crear(request):
-    form = ProductoCrearForm(request.POST or None)
+    form = ProductoCrearForm(request.POST or None, initial={'codigo_barras': request.GET.get('codigo', '')})
     if request.method == 'POST' and form.is_valid():
         with transaction.atomic():
             producto = form.save()

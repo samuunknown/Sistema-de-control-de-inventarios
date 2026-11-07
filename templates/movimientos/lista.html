@@ -8,10 +8,12 @@
     <h2 class="mb-0">Movimientos</h2>
     <p class="text-muted mb-0">{{ page.paginator.count }} movimientos encontrados</p>
   </div>
-  <div class="d-flex gap-2">
-    <a href="{% url 'movimiento_traslado' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-right"></i> Traslado</a>
-    <a href="{% url 'movimiento_crear' %}" class="btn btn-acento"><i class="bi bi-plus-lg"></i> Nuevo movimiento</a>
-  </div>
+  {% if perms.inventario.add_movimiento %}
+    <div class="d-flex gap-2">
+      <a href="{% url 'movimiento_traslado' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-right"></i> Traslado</a>
+      <a href="{% url 'movimiento_crear' %}" class="btn btn-acento"><i class="bi bi-plus-lg"></i> Nuevo movimiento</a>
+    </div>
+  {% endif %}
 </div>
 
 <form method="get" class="card border-0 shadow-sm mb-3">

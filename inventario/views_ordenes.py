@@ -113,6 +113,7 @@ class OrdenLista(LoginRequiredMixin, ListView):
         params = self.request.GET.copy()
         params.pop('page', None)
         ctx['querystring'] = params.urlencode()
+        ctx['puede_crear'] = self.request.user.has_perm(f'inventario.add_{cfg["modelo"]._meta.model_name}')
         return ctx
 
 
@@ -131,7 +132,10 @@ class OrdenDetalle(LoginRequiredMixin, DetailView):
         ctx = super().get_context_data(**kwargs)
         ctx.update(_contexto(self.prefijo, self.object))
         ctx['items'] = self.object.items.all()
-        ctx['pendiente'] = self.object.estado == 'PENDIENTE'
+        ctx['pendiente'] = (
+            self.object.estado == 'PENDIENTE'
+            and self.request.user.has_perm(f'inventario.change_{self.object._meta.model_name}')
+        )
         return ctx
 
 
